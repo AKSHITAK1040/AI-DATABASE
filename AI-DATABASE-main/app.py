@@ -1,6 +1,6 @@
 import streamlit as st
 from pathlib import Path
-from langchain_community.agent_toolkits import create_sql_agent, SQLDatabaseToolkit
+from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.utilities import SQLDatabase
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 from sqlalchemy import create_engine
@@ -322,7 +322,7 @@ else:
         st.stop()
     
     # Configure database
-    @st.cache_resource(ttl="2h")
+    @st.cache_resource(ttl=7200)
     def configure_db(db_choice, mysql_config=None):
         if db_choice == "SQLite (Local student.db)":
             dbfilepath = (Path(__file__).parent / "student.db").absolute()
@@ -340,10 +340,9 @@ else:
             db = configure_db(st.session_state.db_choice, st.session_state.mysql_config)
         
         # Create agent
-        toolkit = SQLDatabaseToolkit(db=db, llm=llm)
         agent = create_sql_agent(
             llm=llm,
-            toolkit=toolkit,
+            db=db,
             verbose=True,
             agent_type="zero-shot-react-description"
         )
